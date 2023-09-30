@@ -13,6 +13,5 @@ public class ThreadExampleUsingLambdaExpression {
          */
         Thread thread = new Thread(lambdaTask);
         thread.start();
-
     }
 }

@@ -12,7 +12,7 @@ class NumberPrinterThread extends Thread {
         System.out.println("Inside run method " + Thread.currentThread().getName() + " called run() method!!!"+ "" +
                 "Thread state is : "+ Thread.currentThread().getState());        try {
             Thread.sleep(2000);
-            this.numberPrinter.print();
+            this.numberPrinter.printNumber();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

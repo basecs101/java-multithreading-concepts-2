@@ -13,7 +13,7 @@ class NumberPrinterRunnableImpl implements Runnable {
                 "Thread state is : "+ Thread.currentThread().getState());
         try {
             Thread.sleep(2000);//Thread goes to Timed_Waiting, thread is waiting for finite amount of time
-            this.numberPrinter.print();
+            this.numberPrinter.printNumber();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
