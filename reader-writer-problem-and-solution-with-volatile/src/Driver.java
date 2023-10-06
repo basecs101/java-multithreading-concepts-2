@@ -10,6 +10,9 @@
  * volatile keyword with variables, so that it will enforce read/write directly to/from
  * main memory and hence all the threads will have same values of volatile variables.
  *
+ *  the problem still exist where
+ *  the message written by writer is over witten by itself
+ *  and hence proper reader-writer functioning is missing
  */
 class Message {
     volatile String msg;
@@ -21,9 +24,7 @@ class Message {
     }
 
     String readMessage(){
-        while (isEmptyMsg){
-        }
-
+        while (isEmptyMsg);
 
         this.isEmptyMsg = true;
         return this.msg;
@@ -31,8 +32,8 @@ class Message {
 
     void writeMessage(String msg){
         //if msg is not empty
-        while (!isEmptyMsg){
-        }
+        while (!isEmptyMsg);
+
         System.out.println("Message written is : " + msg);
         this.msg = msg;
         this.isEmptyMsg = false;
@@ -49,11 +50,13 @@ class Reader implements Runnable {
 
     @Override
     public void run() {
-        for (String msg = this.message.readMessage();
+        String msg;
+        for (msg = this.message.readMessage();
              !"Finished Writing!!!".equals(msg);
              msg = this.message.readMessage()){
             System.out.println("Message read by Reader: "+ msg);
         }
+        System.out.println("Message read by Reader: "+ msg);
     }
 }
 

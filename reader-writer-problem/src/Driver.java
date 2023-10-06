@@ -16,18 +16,16 @@ class Message {
     }
 
     String readMessage(){
-        while (isEmptyMsg){
-        }
-
+        while (this.isEmptyMsg);
 
         this.isEmptyMsg = true;
-        return this.msg;
+        return this.msg;//return message read by reader
     }
 
     void writeMessage(String msg){
-        //if msg is not empty
-        while (!isEmptyMsg){
-        }
+        //if msg is not empty then wait
+        while (!isEmptyMsg);
+
         System.out.println("Message written is : " + msg);
         this.msg = msg;
         this.isEmptyMsg = false;
