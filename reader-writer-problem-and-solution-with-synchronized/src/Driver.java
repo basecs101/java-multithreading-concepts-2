@@ -22,11 +22,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * Atomic -> volatile + thread safety for the variable.
  *
  * Now we are using atomic instead of volatile but the problem still exist where
- * the message written by writer is over written by itself and hence proper reader-writer
+ * the message written by writer is overwritten by itself and hence proper reader-writer
  * functioning is missing
  *
  * If reader thread starts first then it acquires lock and goes into WAITING state
  * and Writer goes into BLOCKED state.
+ *
+ * Also, there could be a scenario where Writer thread writes messages multiple times before
+ * even Reader thread gets a chance to read a msg. So overwriting problem still exits.
  */
 class Message {
     AtomicReference<String> msg;

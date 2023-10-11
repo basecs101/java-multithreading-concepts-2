@@ -10,8 +10,7 @@
  * volatile keyword with variables, so that it will enforce read/write directly to/from
  * main memory and hence all the threads will have same values of volatile variables.
  *
- *  the problem still exist where
- *  the message written by writer is over witten by itself
+ *  the problem still exist where the message written by writer is over witten by itself.
  *  and hence proper reader-writer functioning is missing
  */
 class Message {

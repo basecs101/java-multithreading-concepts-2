@@ -5,6 +5,14 @@
  * core1 --> Thread1 [core1 cache1]  <-- [Heap(Main Memory)]
  * core2 --> Thread2 [core2 cache2]  <-- [Heap(Main Memory)]
  * Each thread reads message object from heap and stores them into their cache.
+ *
+ *
+ * Problem is local cache, and each thread reads value from cache.
+ * One scenario could be, Reader thread reads isEmptyMsg as true initially
+ * from the heap and then stores it in local cache and goes into infinite loop,
+ * then Writer thread reads the value from the heap as true and stores the value
+ * as true in local cache then it writes a new msg and makes isEmptyMsg as false
+ * in its local cache and hence goes into infinite loop.
  */
 class Message {
     String msg;

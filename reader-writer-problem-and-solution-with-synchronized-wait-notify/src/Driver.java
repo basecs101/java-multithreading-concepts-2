@@ -1,5 +1,8 @@
+import com.sun.jdi.IntegerType;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
 
 /**
  * A CPU can be dual or quad-core and each can run one thread.
@@ -7,23 +10,25 @@ import java.util.concurrent.atomic.AtomicReference;
  * in this core.
  * core1 --> Thread1 [core1 cache1]  <-- [Heap(Main Memory)]
  * core2 --> Thread2 [core2 cache2]  <-- [Heap(Main Memory)]
- * Each thread reads message object from heap and stores them into their cache of respective cpus.
+ * Each thread reads message object from heap and stores them into their cache.
  *
  * To solve the problem of local thread cache update issue, we can use
  * volatile keyword with variables that will enforce read/write directly to the
  * main memory and hence all the threads will have same values of volatile variables.
  *
- * volatile variable can be accessed/updated by many threads at the same time.
+ * volatile vairable can be accessed/updated by many threads at the same time.
  *
- * atomic internally usage 'volatile' but it makes sure that operation is atomic and
+ * atomic internally usage volatile but it make sure that operation is atomic and
  * one thread is accessing/updating the atomic at a time
  *
- * Atomic -> volatile + makes operation atomic and hence provides
- * thread safety for the variable.
+ * Atomic -> volatile + thread safety for the variable.
  *
  * Now we are using atomic instead of volatile but the problem still exist where
- * the message written by writer is overwritten by itself and hence proper reader-writer
+ * the message written by writer is over written by itself and hence proper reader-writer
  * functioning is missing
+ *
+ * If reader thread starts first then it acquires lock and goes into WAITING state
+ * and Writer goes into BLOCKED state.
  */
 class Message {
     AtomicReference<String> msg;
@@ -34,22 +39,27 @@ class Message {
         this.isEmptyMsg = isEmptyMsg;
     }
 
-    String readMessage(){
+    synchronized String readMessage() throws InterruptedException {
         while (isEmptyMsg.get()){
+            //reader thread wait
+            this.wait();
         }
 
-
         this.isEmptyMsg.set(true);
+        this.notifyAll();
         return this.msg.get();
     }
 
-    void writeMessage(String msg){
+    synchronized void writeMessage(String msg) throws InterruptedException {
         //if msg is not empty
         while (!isEmptyMsg.get()){
+            this.wait();
         }
+
         System.out.println("Message written is : " + msg);
         this.msg = new AtomicReference<>(msg);
         this.isEmptyMsg.set(false);
+        this.notify();
     }
 }
 
@@ -63,10 +73,14 @@ class Reader implements Runnable {
 
     @Override
     public void run() {
-        for (String msg = this.message.readMessage();
-             !"Finished Writing!!!".equals(msg);
-             msg = this.message.readMessage()){
-            System.out.println("Message read by Reader: "+ msg);
+        try{
+            for (String msg = this.message.readMessage();
+                 !"Finished Writing!!!".equals(msg);
+                 msg = this.message.readMessage()){
+                System.out.println("Message read by Reader: "+ msg);
+            }
+        }catch (InterruptedException runtimeException){
+           throw new RuntimeException();
         }
     }
 }
@@ -79,9 +93,17 @@ class Writer implements Runnable {
     @Override
     public void run() {
         for (String msg : new String[]{"Hello", "how", "are", "you"}){
-            this.message.writeMessage(msg);
+            try {
+                this.message.writeMessage(msg);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
-        this.message.writeMessage("Finished Writing!!!");
+        try {
+            this.message.writeMessage("Finished Writing!!!");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
