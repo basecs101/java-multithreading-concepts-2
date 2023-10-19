@@ -1,11 +1,12 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Producer -> Produces an item in the buffer
  * Consumer -> Consumes an item from the buffer
  * If the shared buffer is not synchronized properly, there is chance that
- * IndexOutOfBoundsException may occur.
+ * ArrayIndexOutOfBoundsException may occur.
  * Hence, appropriate synchronized blocks for shared buffer must be used.
  * This solves the problem of exception, but sometimes a thread may go in
  * long waiting for acquiring lock on the buffer, such threads are starved(waiting for the lock)
@@ -13,9 +14,11 @@ import java.util.List;
  */
 class Producer implements Runnable {
     private final List<String> buffer;
+    private final ReentrantLock lock;
 
-    public Producer(List<String> buffer) {
+    public Producer(List<String> buffer, ReentrantLock lock) {
         this.buffer = buffer;
+        this.lock = lock;
     }
 
 
@@ -25,37 +28,51 @@ class Producer implements Runnable {
         for (String number : numbers) {
             Main.waitForMillis(Main.MILLIS);
             System.out.println(Thread.currentThread().getName() + " added " + number);
-            synchronized (this.buffer) {
-                buffer.add(number);
-            }
+            addItemToTheBuffer(number);
         }
         System.out.println(Thread.currentThread().getName() + " added " + Main.EOB);
-        Main.waitForMillis(Main.MILLIS);
-        synchronized (this.buffer) {
-            buffer.add(Main.EOB);
-        }
+        addItemToTheBuffer(Main.EOB);
+    }
 
+    private void addItemToTheBuffer(String item) {
+        try {
+            this.lock.lock();
+            this.lock.lock();
+            this.lock.lock();
+            System.out.println("this.lock.getHoldCount() : "+this.lock.getHoldCount());
+            Main.waitForMillis(Main.MILLIS);
+            buffer.add(item);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            this.lock.unlock();
+            this.lock.unlock();
+            this.lock.unlock();
+            System.out.println("this.lock.isHeldByCurrentThread() : "+this.lock.isHeldByCurrentThread());
+
+        }
     }
 }
 
 class Consumer implements Runnable {
     private final List<String> buffer;
 
-    public Consumer(List<String> buffer) {
+    private final ReentrantLock lock;
+
+    public Consumer(List<String> buffer, ReentrantLock lock) {
         this.buffer = buffer;
+        this.lock = lock;
     }
 
     @Override
     public void run() {
-
         while (true) {
-
-            synchronized (this.buffer) {
-
+            try {
+                this.lock.lock();
                 if (buffer.isEmpty()) {
-
                     Main.waitForMillis(Main.MILLIS);
-                    System.out.println(Thread.currentThread().getName() + " buffer is empty");
+                    System.out.println(Thread.currentThread().getName() + " buffer is empty "
+                            + "holdCount : "+ this.lock.getHoldCount());
                     continue;
                 }
                 if (buffer.get(0).equals(Main.EOB)) {
@@ -66,10 +83,12 @@ class Consumer implements Runnable {
                     Main.waitForMillis(Main.MILLIS);
                     System.out.println(Thread.currentThread().getName() + " removed " + buffer.remove(0));
                 }
-
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                this.lock.unlock();
             }
         }
-
     }
 }
 
@@ -88,13 +107,15 @@ public class Main {
     public static void main(String[] args) {
         List<String> buffer = new ArrayList<>();
 
-        Thread producerThread = new Thread(new Producer(buffer));
+        ReentrantLock lock = new ReentrantLock(true);
+
+        Thread producerThread = new Thread(new Producer(buffer, lock));
         producerThread.setName("Producer-Thread");
 
-        Thread consumerThread1 = new Thread(new Consumer(buffer));
+        Thread consumerThread1 = new Thread(new Consumer(buffer, lock));
         consumerThread1.setName("Consumer-Thread1");
 
-        Thread consumerThread2 = new Thread(new Consumer(buffer));
+        Thread consumerThread2 = new Thread(new Consumer(buffer, lock));
         consumerThread2.setName("Consumer-Thread2");
 
         producerThread.start();

@@ -6,6 +6,8 @@ import java.util.List;
  * Consumer -> Consumes an item from the buffer(an array)
  * If the shared buffer is not synchronized properly, there is chance that
  * IndexOutOfBoundsException may occur.
+ *
+ * There could be a scenario where both threads stuck in while loop when they read EOB.
  */
 class Producer implements Runnable {
     private final List<String> buffer;
@@ -17,8 +19,8 @@ class Producer implements Runnable {
 
     @Override
     public void run() {
-        String[] numbers = {"1", "2", "3"};
-        for (String number : numbers) {
+        String[] stringNumbers = {"1", "2", "3"};
+        for (String number : stringNumbers) {
             Main.waitForMillis(Main.MILLIS);
             System.out.println(Thread.currentThread().getName() + " added " + number);
             buffer.add(number);
@@ -38,11 +40,8 @@ class Consumer implements Runnable {
 
     @Override
     public void run() {
-
         while (true) {
-
             if (buffer.isEmpty()) {
-
                 Main.waitForMillis(Main.MILLIS);
                 System.out.println(Thread.currentThread().getName() + " buffer is empty");
                 continue;
@@ -55,7 +54,6 @@ class Consumer implements Runnable {
                 Main.waitForMillis(Main.MILLIS);
                 System.out.println(Thread.currentThread().getName() + " removed " + buffer.remove(0));
             }
-
         }
     }
 }
