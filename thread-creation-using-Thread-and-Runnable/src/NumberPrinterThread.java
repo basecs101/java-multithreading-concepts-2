@@ -9,7 +9,7 @@ class NumberPrinterThread extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Inside run method " + Thread.currentThread().getName() + " called run() method!!!"+ "" +
+        System.out.println("Inside run() method " + Thread.currentThread().getName() + " called run() method!!!"+ "" +
                 "Thread state is : "+ Thread.currentThread().getState());        try {
             Thread.sleep(2000);
             this.numberPrinter.printNumber();

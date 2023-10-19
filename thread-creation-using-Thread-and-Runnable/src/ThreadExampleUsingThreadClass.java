@@ -6,10 +6,13 @@ public class ThreadExampleUsingThreadClass {
 
         Thread thread1 = new NumberPrinterThread(numberPrinter);
         thread1.setName("Thread-1");
+        thread1.setPriority(Thread.MAX_PRIORITY);
         Thread thread2 = new NumberPrinterThread(numberPrinter);
         thread1.setName("Thread-2");
+        thread1.setPriority(Thread.NORM_PRIORITY);
         Thread thread3 = new NumberPrinterThread(numberPrinter);
         thread1.setName("Thread-3");
+        thread1.setPriority(Thread.MIN_PRIORITY);
 
         try{
             thread1.start();//thread1 is calling run method

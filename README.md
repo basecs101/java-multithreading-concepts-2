@@ -78,6 +78,3 @@ Everything about threading in java
 7. What are Concurrent Collection Classes?
 8. What is Executors Class?
 9. What are some improvements in Concurrency API in Java 8?
-
-
-Writing in char streaming and set priority isn't working.
