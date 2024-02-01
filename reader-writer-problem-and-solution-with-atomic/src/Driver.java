@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * volatile variable can be accessed/updated by many threads at the same time.
  *
  * atomic internally usage 'volatile' but it makes sure that operation is atomic and
- * one thread is accessing/updating the atomic at a time
+ * one thread is accessing/updating the atomic variable at a time
  *
  * Atomic -> volatile + makes operation atomic and hence provides
  * thread safety for the variable.
